@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class ContactActivity extends AppCompatActivity {
@@ -18,13 +19,27 @@ public class ContactActivity extends AppCompatActivity {
     public static final int REQUEST_SELECT_PHONE_NUMBER = 1;
     private String name;
     private String phoneNumber;
-    private TextView contactMessage;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
+        Button contract = findViewById(R.id.select_contact);
+        contract.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectContact(view);
+            }
+        });
+        Button lifecycle = findViewById(R.id.lifecycle);
+        lifecycle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ContactActivity.this, LifecycleActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     public void selectContact(View view) {
@@ -52,7 +67,7 @@ public class ContactActivity extends AppCompatActivity {
             }
             assert cursor != null;
             cursor.close();
-            contactMessage = findViewById(R.id.contact_message);
+            TextView contactMessage = findViewById(R.id.contact_message);
             contactMessage.setText(String.format("%s %s", name, phoneNumber));
         }
     }
