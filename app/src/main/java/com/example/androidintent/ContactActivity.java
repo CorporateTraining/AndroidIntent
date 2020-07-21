@@ -1,25 +1,22 @@
 package com.example.androidintent;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class ContactActivity extends AppCompatActivity {
 
     public static final int REQUEST_SELECT_PHONE_NUMBER = 1;
     private String name;
     private String phoneNumber;
-    private TextView contactMessage;
 
 
     @Override
@@ -45,22 +42,26 @@ public class ContactActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        Uri contactUri = null;
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_SELECT_PHONE_NUMBER && resultCode == RESULT_OK) {
-            assert data != null;
-            Uri contactUri = data.getData();
-            String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
-            assert contactUri != null;
-            Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-                this.name = cursor.getString(nameIndex);
-                this.phoneNumber = cursor.getString(numberIndex);
+            if(data != null){
+                contactUri = data.getData();
             }
-            assert cursor != null;
-            cursor.close();
-            contactMessage = findViewById(R.id.contact_message);
+            if(contactUri != null) {
+                String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
+                try (Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null)) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        int numberIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                        int nameIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                        this.name = cursor.getString(nameIndex);
+                        this.phoneNumber = cursor.getString(numberIndex);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            TextView contactMessage = findViewById(R.id.contact_message);
             contactMessage.setText(String.format("%s %s", name, phoneNumber));
         }
     }
